@@ -1,0 +1,56 @@
+---
+- name: Installing dependencies
+  become: yes
+  block:
+    - name: Update and upgrade apt packages
+      apt:
+        upgrade: yes
+        update_cache: yes
+        cache_valid_time: 86400
+        
+    - name: Checking gh Installation
+      shell: gh --version
+      register: gh_output
+      ignore_errors: true
+
+    - name: Install gh
+      shell: snap install gh 
+      when: gh_output.rc != 0
+      
+    #- name: Install gh using snap
+     # snap:
+     #   name: gh
+     #   classic: yes
+     # ignore_errors: true
+     # when: gh_output.rc != 0
+
+    - name: Checking Ansible Installation
+      shell: ansible --version
+      register: ansible_output
+      ignore_errors: true
+
+    - name: Install Ansible
+      apt:
+        name: ansible
+        state: present
+      when: ansible_output.rc != 0
+
+- name: Download BeSman Installer
+  get_url:
+    url: https://raw.githubusercontent.com/Be-Secure/BeSman/dist/dist/get.besman.io
+    dest: /tmp/besman-installer.sh
+    mode: '777'
+  register: download
+
+- name: Installing BeSman
+  become: yes
+  #become_user: "{{ lookup('ansible.builtin.env', 'USER')|default('nobody', True) }}"
+  become_user: "{{ system_user }}"
+  shell: /tmp/besman-installer.sh
+  when: download is defined
+
+- name: Removeing besman-installer.sh
+  file:
+    path: /tmp/besman-installer.sh
+    state: absent
+  when: download is defined

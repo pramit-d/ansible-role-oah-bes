@@ -1,2 +1,3 @@
 ---
 oah_command: install
+system_user: vagrant

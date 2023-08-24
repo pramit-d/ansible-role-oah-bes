@@ -2,3 +2,7 @@
 - debug:
     msg: "oah-remove of bes.shell"
 #remove bes-shell
+
+- name: Remove BeSman
+  include_tasks: oah-remove-besman.yml
+  ignore_errors: true

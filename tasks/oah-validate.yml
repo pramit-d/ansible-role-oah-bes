@@ -4,3 +4,7 @@
 # validate if the version of OAH
 
 # display status of oah-shell
+
+- name: Validate BeSman
+  include_tasks: oah-validate-besman.yml
+  ignore_errors: true

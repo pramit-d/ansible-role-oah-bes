@@ -4,3 +4,7 @@
 #remove bes-shell
 
 #install bes-shell
+- name: Reset BeSman
+  include_tasks: oah-install-besman.yml
+  ignore_errors: true
+  

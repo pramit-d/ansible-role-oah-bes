@@ -2,5 +2,7 @@
 - hosts: localhost
   remote_user: root
   vars:
+    - oah_command: 'install'
+    - system_user: "{{ lookup('ansible.builtin.env', 'USER') }}"
   roles:
-    - ansible-role-oah
+    - ansible-role-oah-bes

@@ -1,0 +1,19 @@
+---
+- name: Check BeSman installation
+  command: bes --version
+  register: bes_output
+  ignore_errors: true
+
+- shell: bes --version | grep -oP '\d+\.\d+\.\d+'
+  register: bes_v
+  when: bes_output.rc == 0
+
+- name: Message
+  debug:
+    msg: "BeSman found - {{ bes_v.stdout }}"
+  when: bes_output.rc == 0
+
+- name: Message
+  debug:
+    msg: "BeSman not found"
+  when: bes_output.rc != 0

@@ -1,0 +1,8 @@
+---
+- name: Remove BeSman
+  become: yes
+  #become_user: "{{ lookup('ansible.builtin.env', 'USER')|default('nobody', True) }}"
+  become_user: "{{ system_user }}"
+  file:
+    path: /{{ ansible_env.HOME }}/.besman
+    state: absent
