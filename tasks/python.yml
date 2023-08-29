@@ -1,0 +1,15 @@
+- name: Check installed Python version
+  ansible.builtin.command: python3 -c "import sys; print('python_version=' + '.'.join(map(str, sys.version_info[:3])))"
+  register: python_version_output
+  ignore_errors: true
+
+- name: Parse Python version
+  set_fact:
+    installed_python_version: "{{ python_version_output.stdout_lines[0].split('=')[1] }}"
+  when: python_version_output.rc == 0
+
+- name: Upgrade Python to 3.11 if version is below
+  become: yes
+  ansible.builtin.command: apt -y update && apt install -y python3.10
+  when: installed_python_version.split('.')[0] | int < 3 or (installed_python_version.split('.')[0] | int == 3 and installed_python_version.split('.')[1] | int < 11)
+  register: python_install
