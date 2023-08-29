@@ -2,7 +2,10 @@
 - debug:
     msg: "oah-install of oah.bes"
 
-- name: Install BeSman
-  include_tasks: oah-install-besman.yml
-  ignore_errors: true
+#- name: Install BeSman
+#  include_tasks: oah-install-besman.yml
+#  ignore_errors: true
   
+- name: Install BeS-dev-kit
+  include_tasks: oah-install-bes_dev_kit.yml
+  #ignore_errors: true

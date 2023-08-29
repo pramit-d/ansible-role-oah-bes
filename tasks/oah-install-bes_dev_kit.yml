@@ -1,0 +1,44 @@
+---
+- name: Check BeS-dev-kit Installation
+  ansible.builtin.command: bes-dev-kit --version
+  register: kit_output
+  ignore_errors: true
+
+- name: Install Dependencies
+  become: yes
+  become_user: "{{ system_user }}"
+  block:
+    - name: Check installed Python version
+      ansible.builtin.command: python3 -c "import sys; print('python_version=' + '.'.join(map(str, sys.version_info[:3])))"
+      register: python_version_output
+      changed_when: false
+      #ignore_errors: true
+
+    - name: Parse Python version
+      set_fact:
+        installed_python_version: "{{ python_version_output.stdout_lines[0].split('=')[1] }}"
+      when: python_version_output.rc == 0
+
+    - name: Upgrade Python to 3.10 if version is below
+      ansible.builtin.command: sudo apt-get update && sudo apt-get install -y python3.10
+      when: python_version_output.rc != 0 or installed_python_version.split('.')[0] | int < 3 or (installed_python_version.split('.')[0] | int == 3 and installed_python_version.split('.')[1] | int < 10)
+      register: python_install
+
+    - name: Check Installed pip version
+      ansible.builtin.command: python3 -m pip --version | awk '{print $2}'
+      register: pip_version_output
+      changed_when: false
+
+    - name: Upgrade pip to latest version if needed
+      ansible.builtin.command: python3 -m pip install --upgrade pip
+      when: pip_version_output != 0 or pip_version_output.stdout | version_compare('21.0', '<')
+      register: upgrade_pip_result
+      changed_when: upgrade_pip_result.rc == 0
+
+  when: kit_output.rc != 0
+
+- name: Install BeS-dev-kit
+  become: yes
+  become_user: "{{ system_user }}"
+  ansible.builtin.command: python3 -m pip install besecure-developer-toolkit
+  when: kit_output.rc != 0 and python_install.rc == 0 and upgrade_pip_result.rc == 0
